@@ -3,183 +3,201 @@
 #include "NeuralNetwork.h"
 using namespace std;
 
-
-
-NeuralNetwork::NeuralNetwork(NeuralNetConfig* config)
-:inputData(LAYER0 * MINI_BATCH_SIZE),
- outputData(LAST_LAYER_SIZE * MINI_BATCH_SIZE)
+/**
+ * @description: 
+ * @param  config, 神经网络config，遍历config，利用每一层的配置信息，生成相应的layer
+ * FClayer: fully connected layer
+ * CNNlayer:
+ * @return {*}
+ */
+NeuralNetwork::NeuralNetwork(NeuralNetConfig *config)
+    : inputData(LAYER0 * MINI_BATCH_SIZE),
+      outputData(LAST_LAYER_SIZE * MINI_BATCH_SIZE)
 {
-	for (size_t i = 0; i < NUM_LAYERS - 1; ++i)
-	{
-		if (config->layerConf[i]->type.compare("FC") == 0)
-			layers.push_back(new FCLayer(config->layerConf[i]));
-		else if (config->layerConf[i]->type.compare("CNN") == 0)
-			layers.push_back(new CNNLayer(config->layerConf[i]));
-		else if (config->layerConf[i]->type.compare("ChameleonCNN") == 0)
-			layers.push_back(new CNNLayer(config->layerConf[i]));
-		else
-			error("Only FC, CNN and ChameleonCNN layer types currently supported");
-	}
-}
+  for (size_t i = 0; i < NUM_LAYERS - 1; ++i)
+  {
+    if (config->layerConf[i]->type.compare("FC") == 0)
+    {
+      FCConfig *pr = (FCConfig *)config->layerConf[i];
+      layers.push_back(new FCLayer(pr));
+      // layers.push_back(new FCLayer(config->layerConf[i]));
+    }
+    else if (config->layerConf[i]->type.compare("CNN") == 0)
+    {
+      CNNConfig *pr = (CNNConfig *)config->layerConf[i];
+      layers.push_back(new CNNLayer(pr));
+      // layers.push_back(new CNNLayer(config->layerConf[i]));
+    }
+    else if (config->layerConf[i]->type.compare("ChameleonCNN") == 0)
+    {
+      CNNConfig *pr = (CNNConfig *)config->layerConf[i];
+      layers.push_back(new CNNLayer(pr));
+      // layers.push_back(new CNNLayer(config->layerConf[i]));
+    }
 
+    else
+      error("Only FC, CNN and ChameleonCNN layer types currently supported");
+  }
+}
 
 NeuralNetwork::~NeuralNetwork()
 {
-	for (vector<Layer*>::iterator it = layers.begin() ; it != layers.end(); ++it)
-		delete (*it);
+  for (vector<Layer *>::iterator it = layers.begin(); it != layers.end(); ++it)
+    delete (*it);
 
-	layers.clear();
+  layers.clear();
 }
-
 
 void NeuralNetwork::forward()
 {
-	log_print("NN.forward");
+  log_print("NN.forward");
+  layers[0]->forward(inputData);
+  for (size_t i = 1; i < NUM_LAYERS - 1; ++i)
+    layers[i]->forward(*(layers[i - 1]->getActivation()));
 
-	layers[0]->forward(inputData);
-
-	for (size_t i = 1; i < NUM_LAYERS - 1; ++i)
-		layers[i]->forward(*(layers[i-1]->getActivation()));
-
-	// if (PRIMARY)
-	// 	funcReconstruct2PC(*(layers[LL]->getActivation()), (*(layers[LL]->getActivation())).size(), "LL: activations");
+  // if (PRIMARY)
+  // 	funcReconstruct2PC(*(layers[LL]->getActivation()), (*(layers[LL]->getActivation())).size(), "LL: activations");
 }
 
+/*** 
+ * @brief compute dalta and equations
+ */
 void NeuralNetwork::backward()
 {
-	log_print("NN.backward");
+  log_print("NN.backward");
 
-	computeDelta();
-	// cout << "computeDelta done" << endl;
-	updateEquations();
+  computeDelta();
+  // cout << "computeDelta done" << endl;
+  updateEquations();
 }
 
 void NeuralNetwork::computeDelta()
 {
-	log_print("NN.computeDelta");
+  log_print("NN.computeDelta");
 
-	size_t rows = MINI_BATCH_SIZE;
-	size_t columns = LAST_LAYER_SIZE;
-	size_t size = rows*columns;
-	size_t index;
+  size_t rows = MINI_BATCH_SIZE;
+  size_t columns = LAST_LAYER_SIZE;
+  size_t size = rows * columns;
+  size_t index;
 
-	vector<myType> rowSum(size, 0);
-	vector<myType> quotient(size, 0);
+  vector<myType> rowSum(size, 0);
+  vector<myType> quotient(size, 0);
+  // 计算每一行的和 activation按照先行后列的方式存储
+  for (size_t i = 0; i < rows; ++i)
+    for (size_t j = 0; j < columns; ++j)
+      rowSum[i * columns] += (*(layers[LL]->getActivation()))[i * columns + j];
+  // 将每一行的和赋值给行中的每一个元素
+  for (size_t i = 0; i < rows; ++i)
+    for (size_t j = 0; j < columns; ++j)
+      rowSum[i * columns + j] = rowSum[i * columns];
 
-	for (size_t i = 0; i < rows; ++i)
-		for (size_t j = 0; j < columns; ++j)
-			rowSum[i*columns] += (*(layers[LL]->getActivation()))[i * columns + j];
+  //DIVISION CODE BEGINS HERE
+  if (STANDALONE)
+  {
+    for (size_t i = 0; i < rows; ++i)
+      for (size_t j = 0; j < columns; ++j)
+      {
+        index = i * columns + j;
+        if (rowSum[index] != 0)
+          quotient[index] = divideMyTypeSA((*(layers[LL]->getActivation()))[index], rowSum[index]);
+      }
+  }
+  else
+  {
+    // funcDivisionMPC(*(layers[LL]->getActivation()), rowSum, quotient, size);
+    funcDivisionMPC_1(*(layers[LL]->getActivation()), rowSum, quotient, size);
+  }
+  //DIVISION CODE ENDS HERE
 
-	for (size_t i = 0; i < rows; ++i)
-		for (size_t j = 0; j < columns; ++j)
-			rowSum[i*columns + j] = rowSum[i*columns];
+  //WITHOUT DIVISION BEGINS HERE
+  // for (size_t i = 0; i < rows; ++i)
+  // 	for (size_t j = 0; j < columns; ++j)
+  // 		quotient[i * columns + j] += (*(layers[LL]->getActivation()))[i * columns + j];
 
-//DIVISION CODE BEGINS HERE
-	if (STANDALONE)
-	{
-		for (size_t i = 0; i < rows; ++i)
-			for (size_t j = 0; j < columns; ++j)
-			{
-				index = i * columns + j;
-				if (rowSum[index] != 0)
-					quotient[index] = divideMyTypeSA((*(layers[LL]->getActivation()))[index], rowSum[index]);
-			}
-	}
-	else
-	{
-		funcDivisionMPC(*(layers[LL]->getActivation()), rowSum, quotient, size);
-	}
-//DIVISION CODE ENDS HERE
+  // if (STANDALONE)
+  // 	for (size_t i = 0; i < quotient.size(); ++i)
+  // 		quotient[i] *= reluPrimeSmall[i];
 
-//WITHOUT DIVISION BEGINS HERE
-	// for (size_t i = 0; i < rows; ++i)
-	// 	for (size_t j = 0; j < columns; ++j)
-	// 		quotient[i * columns + j] += (*(layers[LL]->getActivation()))[i * columns + j];
+  // if (MPC)
+  // 	error("Implement multiplication by reluPrime here");
+  //WITHOUT DIVISION ENDS HERE
 
-	// if (STANDALONE)
-	// 	for (size_t i = 0; i < quotient.size(); ++i)
-	// 		quotient[i] *= reluPrimeSmall[i];
+  for (size_t i = 0; i < rows; ++i)
+    for (size_t j = 0; j < columns; ++j)
+    {
+      index = i * columns + j;
+      (*(layers[LL]->getDelta()))[index] = quotient[index] - outputData[index];
+    }
 
-	// if (MPC)
-	// 	error("Implement multiplication by reluPrime here");
-//WITHOUT DIVISION ENDS HERE
-
-	for (size_t i = 0; i < rows; ++i)
-		for (size_t j = 0; j < columns; ++j)
-		{
-			index = i * columns + j;
-			(*(layers[LL]->getDelta()))[index] = quotient[index] - outputData[index];
-		}
-
-	for (size_t i = LL; i > 0; --i)
-		layers[i]->computeDelta(*(layers[i-1]->getDelta()));
+  for (size_t i = LL; i > 0; --i)
+    layers[i]->computeDelta(*(layers[i - 1]->getDelta()));
 }
 
 void NeuralNetwork::updateEquations()
 {
-	log_print("NN.updateEquations");
+  log_print("NN.updateEquations");
 
-	for (size_t i = LL; i > 0; --i)
-		layers[i]->updateEquations(*(layers[i-1]->getActivation()));	
+  for (size_t i = LL; i > 0; --i)
+    layers[i]->updateEquations(*(layers[i - 1]->getActivation()));
 
-	layers[0]->updateEquations(inputData);
+  layers[0]->updateEquations(inputData);
 }
 
 void NeuralNetwork::predict(vector<myType> &maxIndex)
 {
-	log_print("NN.predict");
+  log_print("NN.predict");
 
-	size_t rows = MINI_BATCH_SIZE;
-	size_t columns = LAST_LAYER_SIZE;
-	vector<myType> max(rows);
+  size_t rows = MINI_BATCH_SIZE;
+  size_t columns = LAST_LAYER_SIZE;
+  vector<myType> max(rows);
 
-	layers[LL]->findMax(*(layers[LL]->getActivation()), max, maxIndex, rows, columns);
+  layers[LL]->findMax(*(layers[LL]->getActivation()), max, maxIndex, rows, columns);
 }
 
 void NeuralNetwork::getAccuracy(const vector<myType> &maxIndex, vector<size_t> &counter)
 {
-	log_print("NN.getAccuracy");
+  log_print("NN.getAccuracy");
 
-	size_t rows = MINI_BATCH_SIZE;
-	size_t columns = LAST_LAYER_SIZE;
-	vector<myType> max(rows), groundTruth(rows, 0);
+  size_t rows = MINI_BATCH_SIZE;
+  size_t columns = LAST_LAYER_SIZE;
+  vector<myType> max(rows), groundTruth(rows, 0);
 
-	layers[LL]->findMax(outputData, max, groundTruth, rows, columns);
+  layers[LL]->findMax(outputData, max, groundTruth, rows, columns);
 
-	if (STANDALONE)
-	{
-		for (size_t i = 0; i < MINI_BATCH_SIZE; ++i)
-		{
-			counter[1]++;
-			if (maxIndex[i] == groundTruth[i])
-				counter[0]++;
-		}
-	}
-	else
-	{
-		//Reconstruct things
-		vector<myType> temp_max(rows), temp_groundTruth(rows);
-		if (partyNum == PARTY_B)
-			sendTwoVectors<myType>(max, groundTruth, PARTY_A, rows, rows);
+  if (STANDALONE)
+  {
+    for (size_t i = 0; i < MINI_BATCH_SIZE; ++i)
+    {
+      counter[1]++;
+      cout << " max: " << maxIndex[i] << " truth: " << groundTruth[i] << endl;
+      if (maxIndex[i] == groundTruth[i])
+        counter[0]++;
+    }
+  }
+  else
+  {
+    //Reconstruct things
+    vector<myType> temp_max(rows), temp_groundTruth(rows);
+    if (partyNum == PARTY_B)
+      sendTwoVectors<myType>(max, groundTruth, PARTY_A, rows, rows);
 
-		if (partyNum == PARTY_A)
-		{
-			receiveTwoVectors<myType>(temp_max, temp_groundTruth, PARTY_B, rows, rows);
-			addVectors<myType>(temp_max, max, temp_max, rows);
-			dividePlainSA(temp_max, (1 << FLOAT_PRECISION));
-			addVectors<myType>(temp_groundTruth, groundTruth, temp_groundTruth, rows);	
-		}
+    if (partyNum == PARTY_A)
+    {
+      receiveTwoVectors<myType>(temp_max, temp_groundTruth, PARTY_B, rows, rows);
+      addVectors<myType>(temp_max, max, temp_max, rows);
+      dividePlainSA(temp_max, (1 << FLOAT_PRECISION));
+      addVectors<myType>(temp_groundTruth, groundTruth, temp_groundTruth, rows);
+    }
 
-		for (size_t i = 0; i < MINI_BATCH_SIZE; ++i)
-		{
-			counter[1]++;
-			if (temp_max[i] == temp_groundTruth[i])
-				counter[0]++;
-		}		
-	}
+    for (size_t i = 0; i < MINI_BATCH_SIZE; ++i)
+    {
+      cout << " max: " << maxIndex[i] << " truth: " << groundTruth[i] << endl;
+      counter[1]++;
+      if (temp_max[i] == temp_groundTruth[i])
+        counter[0]++;
+    }
+  }
 
-	cout << "Rolling accuracy: " << counter[0] << " out of " 
-		 << counter[1] << " (" << (counter[0]*100/counter[1]) << " %)" << endl;
+  cout << "Rolling accuracy: " << counter[0] << " out of "
+       << counter[1] << " (" << (counter[0] * 100 / counter[1]) << " %)" << endl;
 }
-
-

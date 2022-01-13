@@ -6,8 +6,9 @@ OBJ_FILES    	  := $(patsubst src/%.cpp, src/%.o,$(SRC_CPP_FILES))
 OBJ_FILES    	  += $(patsubst util/%.cpp, util/%.o,$(OBJ_CPP_FILES))
 HEADER_FILES       = $(wildcard src/*.h)
 
-# FLAGS := -g -O0 -w -std=c++11 -pthread -msse4.1 -maes -msse2 -mpclmul -fpermissive -fpic
-FLAGS := -O3 -w -std=c++11 -pthread -msse4.1 -maes -msse2 -mpclmul -fpermissive -fpic
+
+FLAGS := -g -O0 -w -std=c++11 -pthread -msse4.1 -maes -msse2 -mpclmul -fpermissive -fpic
+# FLAGS := -O3 -w -std=c++11 -pthread -msse4.1 -maes -msse2 -mpclmul -fpermissive -fpic
 LIBS := -lcrypto -lssl
 OBJ_INCLUDES := -I 'lib_eigen/' -I 'util/Miracl/' -I 'util/'
 BMR_INCLUDES := $($(OBJ_INCLUDES), -L./)
@@ -36,8 +37,18 @@ standalone: BMRPassive.out
 	./BMRPassive.out STANDALONE 4 files/parties_localhost files/keyA files/keyAB files/data/mnist_data_8_samples files/data/mnist_labels_8_samples files/data/mnist_data_8_samples files/data/mnist_labels_8_samples
 	@echo ""
 
+Standalone: BMRPassive.out
+	./BMRPassive.out STANDALONE 4 files/parties_localhost files/keyA files/keyAB files/data/mnist_data_8_samples files/data/mnist_labels_8_samples files/data/mnist_data_8_samples files/data/mnist_labels_8_samples >./dev/standalone.txt
+	@echo ""
+
+standalone800: BMRPassive.out
+	./BMRPassive.out STANDALONE 4 files/parties_localhost files/keyA files/keyAB files/data1/mnist_data_8_samples files/data1/mnist_labels_8_samples files/data1/mnist_data_8_samples files/data1/mnist_labels_8_samples >./dev/standalone.txt
+
 mnistSA: BMRPassive.out
 	./BMRPassive.out STANDALONE 4 files/parties_localhost files/keyA files/keyAB files/MNIST/mnist_train_data files/MNIST/mnist_train_labels files/MNIST/mnist_train_data files/MNIST/mnist_train_labels
+
+
+
 
 
 ################################################### 4PC ###################################################
@@ -60,7 +71,33 @@ mnist4PC: BMRPassive.out
 three: BMRPassive.out
 	./BMRPassive.out 3PC 2 files/parties_localhost files/keyC files/keyCD files/data/mnist_data_8_AC files/data/mnist_labels_8_AC files/data/mnist_data_8_AC files/data/mnist_labels_8_AC >/dev/null &
 	./BMRPassive.out 3PC 1 files/parties_localhost files/keyB files/keyAB files/data/mnist_data_8_BD files/data/mnist_labels_8_BD files/data/mnist_data_8_BD files/data/mnist_labels_8_BD >/dev/null &
-	xterm -ls -xrm 'XTerm*selectToClipboard:true' -hold -e "./BMRPassive.out 3PC 0 files/parties_localhost files/keyA files/keyAB files/data/mnist_data_8_AC files/data/mnist_labels_8_AC files/data/mnist_data_8_AC files/data/mnist_labels_8_AC " &
+	xterm -ls -xrm 'XTerm*selectToClipboard:true' -hold -e "./BMRPassive.out 3PC 0 files/parties_localhost files/keyA files/keyAB files/data/mnist_data_8_AC files/data/mnist_labels_8_AC files/data/mnist_data_8_AC files/data/mnist_labels_8_AC " 
+Three: BMRPassive.out
+	./BMRPassive.out 3PC 2 files/parties_localhost files/keyC files/keyCD files/data/mnist_data_8_AC files/data/mnist_labels_8_AC files/data/mnist_data_8_AC files/data/mnist_labels_8_AC >./dev/three2.txt &
+	./BMRPassive.out 3PC 1 files/parties_localhost files/keyB files/keyAB files/data/mnist_data_8_BD files/data/mnist_labels_8_BD files/data/mnist_data_8_BD files/data/mnist_labels_8_BD >./dev/three1.txt &
+	./BMRPassive.out 3PC 0 files/parties_localhost files/keyA files/keyAB files/data/mnist_data_8_AC files/data/mnist_labels_8_AC files/data/mnist_data_8_AC files/data/mnist_labels_8_AC >./dev/three0.txt
+
+Three800: BMRPassive.out
+	./BMRPassive.out 3PC 2 files/parties_localhost files/keyC files/keyCD files/data1/mnist_data_8_AC files/data1/mnist_labels_8_AC files/data1/mnist_data_8_AC files/data1/mnist_labels_8_AC >./dev/three2.txt &
+	./BMRPassive.out 3PC 1 files/parties_localhost files/keyB files/keyAB files/data1/mnist_data_8_BD files/data1/mnist_labels_8_BD files/data1/mnist_data_8_BD files/data1/mnist_labels_8_BD >./dev/three1.txt &
+	./BMRPassive.out 3PC 0 files/parties_localhost files/keyA files/keyAB files/data1/mnist_data_8_AC files/data1/mnist_labels_8_AC files/data1/mnist_data_8_AC files/data1/mnist_labels_8_AC >./dev/three0.txt
+
+ 
+three0: BMRPassive.out
+	./BMRPassive.out 3PC 2 files/parties_localhost files/keyC files/keyCD files/data/mnist_data_8_AC files/data/mnist_labels_8_AC files/data/mnist_data_8_AC files/data/mnist_labels_8_AC >/dev/null &
+	./BMRPassive.out 3PC 1 files/parties_localhost files/keyB files/keyAB files/data/mnist_data_8_BD files/data/mnist_labels_8_BD files/data/mnist_data_8_BD files/data/mnist_labels_8_BD >/dev/null 
+#	&
+#	xterm -ls -xrm 'XTerm*selectToClipboard:true' -hold -e "./BMRPassive.out 3PC 0 files/parties_localhost files/keyA files/keyAB files/data/mnist_data_8_AC files/data/mnist_labels_8_AC files/data/mnist_data_8_AC files/data/mnist_labels_8_AC " &
+three2: BMRPassive.out
+# ./BMRPassive.out 3PC 2 files/parties_localhost files/keyC files/keyCD files/data/mnist_data_8_AC files/data/mnist_labels_8_AC files/data/mnist_data_8_AC files/data/mnist_labels_8_AC >/dev/null &
+	./BMRPassive.out 3PC 1 files/parties_localhost_1 files/keyB files/keyAB files/data/mnist_data_8_BD files/data/mnist_labels_8_BD files/data/mnist_data_8_BD files/data/mnist_labels_8_BD >/dev/null &
+	./BMRPassive.out 3PC 0 files/parties_localhost_2 files/keyA files/keyAB files/data/mnist_data_8_AC files/data/mnist_labels_8_AC files/data/mnist_data_8_AC files/data/mnist_labels_8_AC >/dev/null 
+#	&
+#	xterm -ls -xrm 'XTerm*selectToClipboard:true' -hold -e "./BMRPassive.out 3PC 0 files/parties_localhost files/keyA files/keyAB files/data/mnist_data_8_AC files/data/mnist_labels_8_AC files/data/mnist_data_8_AC files/data/mnist_labels_8_AC " &
+
+	
+
+
 
 mnist3PC: BMRPassive.out
 	./BMRPassive.out 3PC 2 files/parties_localhost files/keyC files/keyCD files/MNIST/mnist_train_data_02 files/MNIST/mnist_train_labels_02 files/MNIST/mnist_train_data_02 files/MNIST/mnist_train_labels_02 >/dev/null &

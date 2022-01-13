@@ -1,0 +1,42 @@
+
+when looper = 1  ,varD  : 340425601651556 
+when looper = 1  ,varP  : 768358823438052 
+when looper = 2  ,varD  : 18445625294466691879 
+when looper = 2  ,varP  : 940246599731213 
+when looper = 3  ,varD  : 378886252790787 
+when looper = 3  ,varP  : 18446655922426397230 
+when looper = 4  ,varD  : 236219574346277 
+when looper = 4  ,varP  : 18446636425914631254 
+when looper = 5  ,varD  : 625469083562433 
+when looper = 5  ,varP  : 18446309908471378109 
+when looper = 6  ,varD  : 844874889384081 
+when looper = 6  ,varP  : 18445808352261149296 
+when looper = 7  ,varD  : 18446031582225626616 
+when looper = 7  ,varP  : 114419205195328 
+when looper = 8  ,varD  : 18446563409021769102 
+when looper = 8  ,varP  : 957147070914396 
+when looper = 9  ,varD  : 714437867026015 
+when looper = 9  ,varP  : 469929910490354 
+when looper = 10  ,varD  : 608013648149245 
+when looper = 10  ,varP  : 56766155075714 
+when looper = 11  ,varD  : 18446506905101432995 
+when looper = 11  ,varP  : 488664317102598 
+when looper = 12  ,varD  : 18446385852733098041 
+when looper = 12  ,varP  : 18446036045543437907 
+when looper = 13  ,varD  : 558860323795477 
+when looper = 13  ,varP  : 839764672560724 
+quotient: 
+2361582823744095 
+------------------------------------
+Wall Clock time for No Network: 0.0724378 sec
+CPU time for No Network: 0.0625 sec
+------------------------------------
+------------------------------------
+Communication, No Network, P1: 0.00252MB (sent) 0.00364MB (recv)
+Rounds, No Network, P1: 81(sends) 143(recvs)
+------------------------------------
+----------------------------------
+3PC code, P1
+50 iterations, No Network, batch size 1
+----------------------------------
+

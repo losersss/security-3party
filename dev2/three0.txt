@@ -1,0 +1,49 @@
+
+when looper = 1  ,varD  : 974510493291747 
+when looper = 1  ,varP  : 18445975714886117660 
+when looper = 2  ,varD  : 322100543051932 
+when looper = 2  ,varP  : 18445803827109822451 
+when looper = 3  ,varD  : 292469044326463 
+when looper = 3  ,varP  : 88151283154386 
+when looper = 4  ,varD  : 695273614343041 
+when looper = 4  ,varP  : 107647794920362 
+when looper = 5  ,varD  : 18445825663469718931 
+when looper = 5  ,varP  : 434165238173507 
+when looper = 6  ,varD  : 18446159179351025399 
+when looper = 6  ,varP  : 935721448402320 
+when looper = 7  ,varD  : 768106975412671 
+when looper = 7  ,varP  : 18446629654504356352 
+when looper = 8  ,varD  : 1004986170046942 
+when looper = 8  ,varP  : 18445786926638637252 
+when looper = 9  ,varD  : 336770245700530 
+when looper = 9  ,varP  : 18446274143799061262 
+when looper = 10  ,varD  : 1047423944647291 
+when looper = 10  ,varP  : 18446687307554475910 
+when looper = 11  ,varD  : 18446375916380989810 
+when looper = 11  ,varP  : 18446255409392449018 
+when looper = 12  ,varD  : 18446100941694593337 
+when looper = 12  ,varP  : 708028166113709 
+when looper = 13  ,varD  : 18446058393393305121 
+when looper = 13  ,varP  : 18445904309036990893 
+quotient: 
+18444382490885813770 
+Numerators: 737280 
+Denominator: 16384 
+Quotient: 6249 
+------------------------------------
+Wall Clock time for No Network: 0.0740453 sec
+CPU time for No Network: 0.0625 sec
+------------------------------------
+------------------------------------
+Total communication: 0.010736MB (sent) and 0.010736MB (recv)
+Total calls: 354 (sends) and 354 (recvs)
+------------------------------------
+------------------------------------
+Communication, No Network, P0: 0.002496MB (sent) 0.00356MB (recv)
+Rounds, No Network, P0: 78(sends) 133(recvs)
+------------------------------------
+----------------------------------
+3PC code, P0
+50 iterations, No Network, batch size 1
+----------------------------------
+

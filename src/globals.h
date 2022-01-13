@@ -1,4 +1,13 @@
-
+/*** 
+ * @Description: 
+ * @Version: 1.0
+ * @Author: 
+ * @Date: 2022-01-06 20:30:29
+ * @LastEditors: huhenhong
+ * @LastEditTime: 2022-01-13 20:18:20
+ * @FilePath: /securenn-public/src/globals.h
+ * @Copyright (C) 2022 . All rights reserved.
+ */
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
@@ -11,15 +20,15 @@
 using namespace std;
 
 //Macros
-#define _aligned_malloc(size,alignment) aligned_alloc(alignment,size)
+#define _aligned_malloc(size, alignment) aligned_alloc(alignment, size)
 #define _aligned_free free
-#define getrandom(min, max) ((rand()%(int)(((max) + 1)-(min)))+ (min))
+#define getrandom(min, max) ((rand() % (int)(((max) + 1) - (min))) + (min))
 #define floatToMyType(a) ((myType)(a * (1 << FLOAT_PRECISION)))
 
-
 //AES and other globals
+//#define LOG_DEBUG false
 #define LOG_DEBUG false
-#define RANDOM_COMPUTE 256//Size of buffer for random elements
+#define RANDOM_COMPUTE 256 //Size of buffer for random elements
 #define FIXED_KEY_AES "43739841701238781571456410093f43"
 #define STRING_BUFFER_SIZE 256
 #define true 1
@@ -29,9 +38,9 @@ using namespace std;
 #define DEBUG_PRINT "SIGNED"
 #define CPP_ASSEMBLY 1
 #define MNIST false
-#define PARALLEL true
+#define PARALLEL false
 #define NO_CORES 4
-
+#define MYTYPELEN 20
 
 //MPC globals
 extern int NUM_OF_PARTIES;
@@ -47,37 +56,35 @@ extern int NUM_OF_PARTIES;
 #define PRIME_NUMBER 67
 #define FLOAT_PRECISION 13
 #define PRIMARY (partyNum == PARTY_A or partyNum == PARTY_B)
-#define	NON_PRIMARY (partyNum == PARTY_C or partyNum == PARTY_D)
+#define NON_PRIMARY (partyNum == PARTY_C or partyNum == PARTY_D)
 #define HELPER (partyNum == PARTY_C)
 #define MPC (FOUR_PC or THREE_PC)
 
-
-
 //Neural Network globals.
 //Batch size has to be a power of two
+// #define NUM_LAYERS 4
 #define NUM_LAYERS 5
-#define LL (NUM_LAYERS-2)
+#define LL (NUM_LAYERS - 2)
 #define LAYER0 784
 #define LAYER1 128
 #define LAYER2 128
 #define LAST_LAYER_SIZE 10
 #if MNIST
-	#define TRAINING_DATA_SIZE 60000
-	#define TEST_DATA_SIZE 10000
-	#define LOG_MINI_BATCH 7
+#define TRAINING_DATA_SIZE 60000
+#define TEST_DATA_SIZE 10000
+#define LOG_MINI_BATCH 7
 #else
-	#define TRAINING_DATA_SIZE 8
-	#define TEST_DATA_SIZE 8
-	#define LOG_MINI_BATCH 0
+#define TRAINING_DATA_SIZE 800
+#define TEST_DATA_SIZE 800
+#define LOG_MINI_BATCH 0
 #endif
 #define MINI_BATCH_SIZE (1 << LOG_MINI_BATCH)
+// #define MINI_BATCH_SIZE TRAINING_DATA_SIZE
 #define LOG_LEARNING_RATE 5
 #define LEARNING_RATE (1 << (FLOAT_PRECISION - LOG_LEARNING_RATE))
-#define NO_OF_EPOCHS 1.5
-#define NUM_ITERATIONS 10
-// #define NUM_ITERATIONS ((int) (NO_OF_EPOCHS * TRAINING_DATA_SIZE/MINI_BATCH_SIZE))
-
-
+#define NO_OF_EPOCHS 15
+// #define NUM_ITERATIONS 50
+#define NUM_ITERATIONS ((int)(NO_OF_EPOCHS * TRAINING_DATA_SIZE / MINI_BATCH_SIZE))
 
 //Typedefs and others
 typedef __m128i superLongType;
@@ -87,16 +94,15 @@ typedef uint8_t smallType;
 const int BIT_SIZE = (sizeof(myType) * CHAR_BIT);
 const myType LARGEST_NEG = ((myType)1 << (BIT_SIZE - 1));
 const myType MINUS_ONE = (myType)-1;
-const smallType BOUNDARY = (256/PRIME_NUMBER) * PRIME_NUMBER;
+const smallType BOUNDARY = (256 / PRIME_NUMBER) * PRIME_NUMBER;
 
-const __m128i BIT1 = _mm_setr_epi8(1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-const __m128i BIT2 = _mm_setr_epi8(2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-const __m128i BIT4 = _mm_setr_epi8(4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-const __m128i BIT8 = _mm_setr_epi8(8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-const __m128i BIT16 = _mm_setr_epi8(16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-const __m128i BIT32 = _mm_setr_epi8(32,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-const __m128i BIT64 = _mm_setr_epi8(64,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-const __m128i BIT128 = _mm_setr_epi8(128,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-
+const __m128i BIT1 = _mm_setr_epi8(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+const __m128i BIT2 = _mm_setr_epi8(2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+const __m128i BIT4 = _mm_setr_epi8(4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+const __m128i BIT8 = _mm_setr_epi8(8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+const __m128i BIT16 = _mm_setr_epi8(16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+const __m128i BIT32 = _mm_setr_epi8(32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+const __m128i BIT64 = _mm_setr_epi8(64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+const __m128i BIT128 = _mm_setr_epi8(128, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 #endif
